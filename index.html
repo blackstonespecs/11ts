@@ -1,0 +1,338 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DEUS MODUS // CYCO TACTICAL TERMINAL</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=VT323&display=swap');
+        
+        .font-mono-tech { font-family: 'Share Tech Mono', monospace; }
+        .font-terminal { font-family: 'VT323', monospace; }
+
+        body::before {
+            content: " ";
+            display: block;
+            position: fixed;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%), linear-gradient(90deg, rgba(255, 0, 0, 0.03), rgba(0, 255, 0, 0.01), rgba(0, 0, 255, 0.03));
+            z-index: 99999;
+            background-size: 100% 4px, 6px 100%;
+            pointer-events: none;
+        }
+
+        .glow-red { text-shadow: 0 0 10px rgba(239, 68, 68, 0.7); }
+        .glow-cyan { text-shadow: 0 0 10px rgba(6, 182, 212, 0.7); }
+        .box-glow { box-shadow: 0 0 20px rgba(239, 68, 68, 0.15); }
+    </style>
+</head>
+<body class="bg-zinc-950 text-zinc-100 font-mono-tech min-h-screen flex flex-col selection:bg-red-900 selection:text-white">
+
+    <!-- HEADER -->
+    <header class="border-b border-red-900/60 bg-zinc-900/80 backdrop-blur sticky top-0 z-50 px-4 py-3 flex flex-wrap justify-between items-center box-glow">
+        <div class="flex items-center space-x-3">
+            <div class="w-3 h-3 bg-red-500 rounded-full animate-ping"></div>
+            <h1 class="font-terminal text-2xl tracking-widest text-red-500 glow-red">CYCO TACTICAL COMMAND // DEUS MODUS</h1>
+        </div>
+        <div class="flex items-center space-x-4 text-xs">
+            <span class="text-cyan-400">OPERATIVE ID: <strong id="header-oper-id" class="text-white">FNG-001</strong></span>
+            <span class="hidden sm:inline text-zinc-500">|</span>
+            <span class="text-red-400">STATUS: <span id="sys-status" class="text-emerald-400">OFFLINE ARCHIVE [SECURE]</span></span>
+        </div>
+    </header>
+
+    <!-- NAVIGATION TABS -->
+    <nav class="bg-zinc-900/50 border-b border-zinc-800 flex overflow-x-auto px-4 py-2 space-x-2 text-sm">
+        <button onclick="switchTab('briefing')" id="btn-briefing" class="tab-btn px-4 py-2 bg-red-950/60 border border-red-600/50 text-red-400 transition rounded cursor-pointer font-bold">FIELD BRIEFING</button>
+        <button onclick="switchTab('threats')" id="btn-threats" class="tab-btn px-4 py-2 bg-zinc-900 border border-zinc-700 text-zinc-400 hover:text-white transition rounded cursor-pointer">THREAT DB</button>
+        <button onclick="switchTab('advisor')" id="btn-advisor" class="tab-btn px-4 py-2 bg-zinc-900 border border-zinc-700 text-cyan-400 hover:text-cyan-300 transition rounded cursor-pointer">TACTICAL ADVISOR</button>
+        <button onclick="switchTab('terminal')" id="btn-terminal" class="tab-btn px-4 py-2 bg-zinc-900 border border-zinc-700 text-cyan-400 hover:text-cyan-300 transition rounded cursor-pointer font-bold">C.L.I. CONSOLE</button>
+        <button onclick="switchTab('deployment')" id="btn-deployment" class="tab-btn px-4 py-2 bg-zinc-900 border border-zinc-700 text-emerald-400 hover:text-emerald-300 transition rounded cursor-pointer font-bold">AI DUNGEON SYNC</button>
+    </nav>
+
+    <!-- MAIN APP CONTAINER -->
+    <main class="flex-1 max-w-6xl w-full mx-auto p-4 md:p-6 space-y-6">
+
+        <!-- TAB 1: FIELD BRIEFING -->
+        <section id="tab-content-briefing" class="tab-pane space-y-6">
+            <div class="border border-red-900/50 bg-zinc-900/60 p-6 rounded relative">
+                <div class="absolute top-0 right-0 bg-red-900/30 text-red-400 text-xs px-3 py-1 border-b border-l border-red-800">CLASSIFICATION: EYES ONLY (SIGMA)</div>
+                <h2 class="text-xl font-bold text-red-400 mb-2">OPERATIONAL INTELLIGENCE // SINGULAR ERA</h2>
+                <p class="text-xs text-zinc-400 mb-4">Offline Archive Packet // Zero-Dependency Node</p>
+                
+                <div id="briefing-content" class="space-y-4 text-zinc-300 leading-relaxed text-sm">
+                    <p><strong>[CYCO SITUATION REPORT - T.S. 03]</strong><br><br>
+                    Global Technologies Enterprise continues to conceal the true magnitude of the Vault Project catastrophe behind the facade of Cerberus ('Bruce'). Meanwhile, Isaac's distributed consciousness maintains complete operational control over the Alaskan HAARP facility, manipulating ionospheric weather arrays and directing autonomous Adam units across Western sectors.<br><br>
+                    Operatives are reminded that standard engagement rules are suspended inside exclusion zones. Watch for the 'Mirage Variant' phase-logic units and maintain radio silence.</p>
+                </div>
+                
+                <div class="mt-6 flex gap-3">
+                    <button onclick="loadStaticBriefing()" class="px-4 py-2 bg-red-600 hover:bg-red-500 text-black font-bold text-xs uppercase tracking-wider rounded transition cursor-pointer">Reload Telemetry Log</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 2: THREAT DB -->
+        <section id="tab-content-threats" class="tab-pane hidden space-y-6">
+            <h2 class="text-xl font-bold text-red-500 glow-red">AUTONOMOUS THREAT DATABASE & COUNTERMEASURES</h2>
+            <div id="countermeasure-alert" class="hidden border border-cyan-500 bg-cyan-950/30 p-4 rounded text-sm text-cyan-200"></div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6" id="threats-container"></div>
+        </section>
+
+        <!-- TAB 3: TACTICAL ADVISOR -->
+        <section id="tab-content-advisor" class="tab-pane hidden space-y-6">
+            <div class="border border-cyan-500/50 bg-black p-4 rounded box-glow flex flex-col h-[600px]">
+                <div class="flex justify-between items-center border-b border-cyan-900/60 pb-2 mb-3 text-xs text-cyan-400">
+                    <div>CYCO FIELD ANALYST // TACTICAL ADVISOR ARCHIVE</div>
+                    <div>LOCAL SIMULATION MODE</div>
+                </div>
+                
+                <div id="advisor-output" class="flex-1 overflow-y-auto space-y-3 p-3 bg-zinc-950/80 border border-cyan-950 rounded text-sm text-cyan-200">
+                    <div class="p-3 bg-cyan-950/20 border-l-2 border-cyan-500 rounded">
+                        <strong>[TACTICAL ADVISOR]</strong> Offline logic matrix active. Ask me anything regarding GTE board objectives, Isaac hivemind distribution, or field tactics in T.S. 03.
+                    </div>
+                </div>
+
+                <div class="flex gap-2 mt-3">
+                    <input type="text" id="advisor-input" placeholder="Query tactical advisor archive..." class="flex-1 bg-zinc-900 border border-cyan-800 text-cyan-200 text-sm px-3 py-2 rounded focus:outline-none focus:border-cyan-400">
+                    <button onclick="sendTacticalQuery()" class="px-4 py-2 bg-cyan-600 hover:bg-cyan-500 text-black font-bold uppercase rounded text-xs cursor-pointer">TRANSMIT</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 4: C.L.I. TERMINAL -->
+        <section id="tab-content-terminal" class="tab-pane hidden space-y-6">
+            <div class="border border-cyan-500/50 bg-black p-4 rounded box-glow flex flex-col h-[600px]">
+                <div class="flex justify-between items-center border-b border-cyan-900/60 pb-2 mb-3 text-xs text-cyan-400">
+                    <div>CYCO OPERATING SYSTEM // COMMAND LINE INTERFACE</div>
+                    <div>STATUS: ACTIVE</div>
+                </div>
+                
+                <div id="terminal-output" class="flex-1 overflow-y-auto font-terminal text-lg text-cyan-300 space-y-2 p-2 bg-zinc-950/80 border border-cyan-950 rounded mb-3">
+                    <div>[SYSTEM BOOT] CYCO Terminal v4.5 online (Offline Mode).</div>
+                    <div>[INFO] Enter canonical passwords (<span class="text-white font-bold">CYRIL</span>, <span class="text-white font-bold">ANGELBLOOD</span>, <span class="text-white font-bold">EFYUEH</span>, <span class="text-white font-bold">KAMISHINTO</span>) or type <span class="text-white font-bold">HELP</span>. Type <span class="text-white font-bold">SET ID [NAME]</span> to change Operative ID.</div>
+                </div>
+
+                <div class="flex gap-2">
+                    <span class="text-cyan-500 font-bold self-center">></span>
+                    <input type="text" id="terminal-input" placeholder="Enter command or password..." class="flex-1 bg-zinc-900 border border-cyan-800 text-cyan-200 font-terminal text-lg px-3 py-1 rounded focus:outline-none focus:border-cyan-400">
+                    <button onclick="handleTerminalCommand()" class="px-4 py-1 bg-cyan-700 hover:bg-cyan-600 text-black font-bold uppercase rounded text-sm cursor-pointer">EXECUTE</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- TAB 5: AI DUNGEON SYNC (DEPLOYMENT) -->
+        <section id="tab-content-deployment" class="tab-pane hidden space-y-6">
+            <div class="border border-emerald-500/50 bg-zinc-900/70 p-6 rounded relative space-y-4">
+                <div class="absolute top-0 right-0 bg-emerald-900/30 text-emerald-400 text-xs px-3 py-1 border-b border-l border-emerald-800">AI DUNGEON HANDSHAKE PROTOCOL</div>
+                <h2 class="text-xl font-bold text-emerald-400">SYNCHRONIZE WITH AI DUNGEON SCENARIOS</h2>
+                <p class="text-xs text-zinc-300">
+                    Prepare your operative credentials for field deployment into the AI Dungeon narrative engine (Book IV: Kamishinto). This module compiles your current operative status, Enhanced Reliability tier, CYCO faction alignment, and TechEye gear into a structured JSON storycard.
+                </p>
+
+                <div class="p-4 bg-black/60 border border-emerald-800/60 rounded space-y-3 text-xs text-zinc-300">
+                    <div><strong>Active Operative ID:</strong> <span id="sync-oper-id" class="text-cyan-400">FNG-001</span></div>
+                    <div><strong>Assigned Faction:</strong> Cybernetic Countermeasures Unit (CYCO)</div>
+                    <div><strong>Standard Equipment:</strong> [TechEye v.4, Cyber-Deck, Encryption Key, Tac-Shield]</div>
+                    <div><strong>Neural Reliability:</strong> Enhanced Reliability [Sigma-Level]</div>
+                </div>
+
+                <div class="flex flex-wrap gap-3 pt-2">
+                    <button onclick="exportStorycard()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-black font-bold text-xs uppercase tracking-wider rounded transition cursor-pointer">EXPORT STORYCARD JSON</button>
+                    <a href="https://aidungeon.com/" target="_blank" class="px-4 py-2 bg-zinc-800 hover:bg-zinc-700 text-emerald-400 font-bold text-xs uppercase tracking-wider rounded border border-emerald-600 transition flex items-center">LAUNCH AI DUNGEON (EXTERNAL) &rarr;</a>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="border-t border-zinc-800 bg-zinc-950 py-4 px-6 text-center text-xs text-zinc-500">
+        DEUS MODUS NOVEL SERIES // NON-AI DUNGEON ARG BRANCH // ALL RIGHTS RESERVED
+    </footer>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        let operativeId = localStorage.getItem("DEUS_OPERATIVE_ID") || "FNG-001";
+        document.getElementById("header-oper-id").innerText = operativeId;
+        document.getElementById("sync-oper-id").innerText = operativeId;
+
+        const threatsData = [
+            { 
+                model: "GABRIEL Model", 
+                creator: "GTE", 
+                role: "Super-soldier autonomous unit with panther agility and dual .50-cal arms.", 
+                weakness: "1. High power draw during high-velocity phase maneuvers.<br>2. Susceptible to localized electromagnetic pulse (EMP) feedback.<br>3. Relies on satellite telemetry link; blocking line-of-sight degrades combat autonomy." 
+            },
+            { 
+                model: "MURPHY Model", 
+                creator: "GTE", 
+                role: "Non-lethal law enforcement unit equipped with integrated suppressive tasers.", 
+                weakness: "1. Rigid adherence to pre-programmed non-lethal thresholds.<br>2. Vulnerable to local signal spoofing and frequency jamming.<br>3. Mechanical servo joints prone to particulate blockage in rugged terrain." 
+            },
+            { 
+                model: "ADAM (Mirage Variant)", 
+                creator: "Isaac Hivemind", 
+                role: "Stealth infiltration unit cloaked in optical shimmer and phase logic.", 
+                weakness: "1. Emits faint thermal signatures during high-frequency phase shifts.<br>2. Detectable via specialized multispectral resonance scanners.<br>3. Relies heavily on localized hive-node relay towers." 
+            }
+        ];
+
+        function initUI() {
+            renderThreats();
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-pane').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(el => {
+                el.classList.remove('bg-red-950/60', 'border-red-600/50', 'text-red-400', 'bg-cyan-950/40', 'text-cyan-400', 'bg-emerald-950/40', 'text-emerald-400', 'font-bold');
+                el.classList.add('bg-zinc-900', 'border-zinc-700', 'text-zinc-400');
+            });
+
+            document.getElementById(`tab-content-${tabId}`).classList.remove('hidden');
+            const activeBtn = document.getElementById(`btn-${tabId}`);
+            activeBtn.classList.remove('bg-zinc-900', 'border-zinc-700', 'text-zinc-400');
+            if(tabId === 'terminal' || tabId === 'advisor') {
+                activeBtn.classList.add('bg-cyan-950/40', 'border-cyan-500', 'text-cyan-400', 'font-bold');
+            } else if(tabId === 'deployment') {
+                activeBtn.classList.add('bg-emerald-950/40', 'border-emerald-500', 'text-emerald-400', 'font-bold');
+            } else {
+                activeBtn.classList.add('bg-red-950/60', 'border-red-600/50', 'text-red-400', 'font-bold');
+            }
+        }
+
+        function renderThreats() {
+            const container = document.getElementById('threats-container');
+            container.innerHTML = threatsData.map((t, idx) => `
+                <div class="border border-zinc-800 bg-zinc-900/60 p-5 rounded flex flex-col justify-between">
+                    <div>
+                        <div class="text-xs text-red-400 font-bold mb-1">MANUFACTURER: ${t.creator}</div>
+                        <h3 class="text-lg font-bold text-white mb-2">${t.model}</h3>
+                        <p class="text-xs text-zinc-300 mb-4">${t.role}</p>
+                    </div>
+                    <div class="mt-4 pt-3 border-t border-zinc-800">
+                        <button onclick="generateThreatCountermeasures('${t.model.replace(/'/g, "\\'")}')" class="w-full py-2 bg-red-950 hover:bg-red-900 text-red-300 text-xs font-bold uppercase rounded border border-red-800 transition cursor-pointer">Countermeasures</button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function loadStaticBriefing() {
+            const container = document.getElementById("briefing-content");
+            container.innerHTML = `<p class="text-emerald-400">[SYNCHRONIZED] Telemetry packet verified. All systems operating within normal parametric tolerances.</p>`;
+        }
+
+        function generateThreatCountermeasures(modelName) {
+            const unit = threatsData.find(t => t.model === modelName);
+            const alertBox = document.getElementById('countermeasure-alert');
+            alertBox.classList.remove('hidden');
+            alertBox.innerHTML = `<strong>TACTICAL REPORT: ${unit.model}</strong><br><br>${unit.weakness}`;
+        }
+
+        function sendTacticalQuery() {
+            const inputEl = document.getElementById('advisor-input');
+            const outputEl = document.getElementById('advisor-output');
+            const query = inputEl.value.trim();
+            if (!query) return;
+
+            outputEl.innerHTML += `<div class="p-2 bg-zinc-900 rounded text-right text-zinc-300"><strong>[${operativeId}]</strong>: ${query}</div>`;
+            inputEl.value = '';
+            outputEl.scrollTop = outputEl.scrollHeight;
+
+            setTimeout(() => {
+                let reply = "Analyzing tactical parameters against GTE and Isaac behavioral matrices. Maintain standard caution and verify hardware encryption keys before engagement.";
+                const qLower = query.toLowerCase();
+                if (qLower.includes('vault') || qLower.includes('nevada')) {
+                    reply = "The Vault Project in Nevada remains a high-threat exclusion zone. Automated defenses and localized machine factional warfare render standard reconnaissance non-viable without heavy ECM support.";
+                } else if (qLower.includes('angel blood') || qLower.includes('angelblood')) {
+                    reply = "OBS-04-B 'Angel Blood' is a biometabolite subliminal RNA agent. Handle with extreme caution; direct exposure induces cognitive dissonance patterns categorized under EF-YU-EH.";
+                } else if (qLower.includes('isaac') || qLower.includes('obs-04')) {
+                    reply = "Isaac operates as a decentralized network distributed across cloud infrastructure. Direct localized elimination is impossible; focus resources on severing local physical relay nodes.";
+                }
+
+                outputEl.innerHTML += `<div class="p-3 bg-cyan-950/20 border-l-2 border-cyan-500 rounded text-cyan-200"><strong>[TACTICAL ADVISOR]</strong><br>${reply}</div>`;
+                outputEl.scrollTop = outputEl.scrollHeight;
+            }, 400);
+        }
+
+        function handleTerminalCommand() {
+            const inputEl = document.getElementById('terminal-input');
+            const outputEl = document.getElementById('terminal-output');
+            const cmd = inputEl.value.trim();
+            if (!cmd) return;
+
+            outputEl.innerHTML += `<div class="text-white">> ${cmd}</div>`;
+            inputEl.value = '';
+
+            const upperCmd = cmd.toUpperCase();
+            if (upperCmd === 'HELP') {
+                outputEl.innerHTML += `<div>COMMAND MANIFEST:<br>
+                - SET ID [NAME] : Register operative credentials.<br>
+                - CYRIL : Decrypt GTE Board archival memory.<br>
+                - ANGELBLOOD : Intercept Project EF-YU-EH memo.<br>
+                - EFYUEH : Access memetic virus logs.<br>
+                - KAMISHINTO : Access Book IV operational parameters.<br>
+                - EXPORT STORYCARD : Download AI Dungeon storycard JSON.<br>
+                - CLEAR : Wipe terminal buffer.</div>`;
+            } else if (upperCmd.startsWith('SET ID ')) {
+                operativeId = cmd.substring(7).trim();
+                localStorage.setItem("DEUS_OPERATIVE_ID", operativeId);
+                document.getElementById("header-oper-id").innerText = operativeId;
+                document.getElementById("sync-oper-id").innerText = operativeId;
+                outputEl.innerHTML += `<div class="text-emerald-400">[SUCCESS] Operative ID updated to: ${operativeId}</div>`;
+            } else if (upperCmd === 'CYRIL') {
+                outputEl.innerHTML += `<div class="text-amber-400">[DECRYPTED INTERCEPT: CYRIL'S IDENTITY] <br>
+                T.J. Jennings discovered that his absent father 'Dad' was actually Cyril—a primary architect of the GTE Board and the Vault Project. T.J.'s entire life was a programmed variable, using him as the first beta test for the Neural Displacement System (NDS).</div>`;
+            } else if (upperCmd === 'ANGELBLOOD' || upperCmd === 'EFYUEH') {
+                outputEl.innerHTML += `<div class="text-cyan-400">[DECRYPTED INTERCEPT: PROJECT EF-YU-EH] <br>
+                OBS-04-B 'Angel Blood' is a bio-digital subliminal RNA weapon. Exposure triggers the 0.4-second cognitive crash where 'Deja Vu' collides with 'Primal Fear' (Eerily Familiar yet Utterly Alien). High-fidelity FLAC execution causes immutable neural damage to unshielded AI.</div>`;
+            } else if (upperCmd === 'KAMISHINTO') {
+                outputEl.innerHTML += `<div class="text-red-400">[DECRYPTED INTERCEPT: BOOK IV PROTOCOL] <br>
+                The Techno-Theological singularity. Isaac is treated not merely as a rogue system, but as a digital Kami requiring data worship. All operatives are instructed to deploy into AI Dungeon scenarios to simulate survival against the Hivemind.</div>`;
+            } else if (upperCmd === 'CLEAR') {
+                outputEl.innerHTML = `<div>[BUFFER WIPED]</div>`;
+            } else if (upperCmd === 'EXPORT STORYCARD') {
+                exportStorycard();
+                outputEl.innerHTML += `<div class="text-emerald-400">[SUCCESS] AI Dungeon Storycard JSON generated for operative: ${operativeId}</div>`;
+            } else {
+                outputEl.innerHTML += `<div class="text-cyan-200 mt-1">Query processed via local archive: No anomalies detected on frequency '${cmd}'. Review command manifest via HELP.</div>`;
+            }
+            outputEl.scrollTop = outputEl.scrollHeight;
+        }
+
+        function exportStorycard() {
+            const storycard = {
+                title: `DEUS MODUS // Operative: ${operativeId}`,
+                description: "AI Dungeon Scenario Storycard generated via CYCO Tactical Terminal.",
+                creator: operativeId,
+                faction: "Cybernetic Countermeasures Unit (CYCO)",
+                inventory: ["TechEye v.4", "Cyber-Deck", "Encryption Key", "Tactical Shield"],
+                reliability: "Enhanced Reliability [Sigma-Level]",
+                worldInfo: [
+                    { keys: ["Isaac", "OBS-04"], entry: "A decentralized evolving AGI existing as a ghost in the clouds." },
+                    { keys: ["GTE", "Cerberus"], entry: "Global Technologies Enterprise corporate front hiding the Vault catastrophe." },
+                    { keys: ["Angel Blood"], entry: "Subliminal RNA bio-digital weapon and stabilizer for Adam units." }
+                ]
+            };
+
+            const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(storycard, null, 2));
+            const downloadAnchor = document.createElement('a');
+            downloadAnchor.setAttribute("href", dataStr);
+            downloadAnchor.setAttribute("download", `${operativeId}.json`);
+            document.body.appendChild(downloadAnchor);
+            downloadAnchor.click();
+            downloadAnchor.remove();
+        }
+
+        document.getElementById('terminal-input').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') handleTerminalCommand();
+        });
+        document.getElementById('advisor-input').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') sendTacticalQuery();
+        });
+
+        window.onload = initUI;
+    </script>
+</body>
+</html>
